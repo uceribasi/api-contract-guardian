@@ -7,12 +7,12 @@ import {
 } from "ts-morph";
 
 function resolveTemplateExpression(te: TemplateExpression): string {
-    const head = te.getHead().getText().slice(1, -2); // ilk backtick ve ${ öncesi `
+    const head = te.getHead().getText().slice(1, -2);
     let out = head;
     for (const span of te.getTemplateSpans()) {
         out += "{var}";
-        const lit = span.getLiteral().getText(); // e.g. "}foo`" veya "}`"
-        out += lit.slice(0, lit.length - 1); // sondaki backtick'i at
+        const lit = span.getLiteral().getText();
+        out += lit.slice(0, lit.length - 1);
     }
     return out;
 }

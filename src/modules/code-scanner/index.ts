@@ -103,8 +103,8 @@ const findRequestsWithAxios = (
     if (!expression.isKind(SyntaxKind.PropertyAccessExpression)) return null;
 
     const propAccess = expression as PropertyAccessExpression;
-    const callee = propAccess.getExpression();       // axios | api | chalk | console | document ...
-    const methodName = propAccess.getName();         // get/post/... | log | blue | getElementById | push ...
+    const callee = propAccess.getExpression();
+    const methodName = propAccess.getName();
 
     if (!callee.isKind(SyntaxKind.Identifier)) return null;
     const calleeName = callee.getText();

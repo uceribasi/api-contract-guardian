@@ -34,7 +34,6 @@ export const parseNodeValue = (valueNode: Node | undefined): any => {
         return raw.slice(1, -1).replace(/\$\{[^}]+\}/g, "{var}");
     }
     if (valueNode.isKind(SyntaxKind.Identifier)) {
-        // Değerini okuyabilen üst katman bunu çözebilsin diye işaret bırakmak yerine null döndürmeyelim:
         const resolved = resolveStringFromNode(valueNode);
         return resolved ?? `{Variable: ${valueNode.getText()}}`;
     }
