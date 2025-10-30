@@ -140,7 +140,17 @@ const findRequestsWithAxios = (
 
 export const scanCode = async (basePath: string, globPath: string): Promise<Request[]> => {
     const project = new Project({ compilerOptions: { allowJs: true } });
-    const files = await glob(globPath, { dot: true });
+    const files = await glob(globPath, {
+        dot: true,
+        ignore: [
+            'node_modules/**',
+            'dist/**',
+            'build/**',
+            '.next/**',
+            '.git/**',
+            '.idea/**'
+        ]
+    });
     project.addSourceFilesAtPaths(files);
 
     const sources = project.getSourceFiles();
