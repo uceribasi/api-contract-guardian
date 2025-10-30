@@ -1,0 +1,36 @@
+{
+  "name": "api-contract-guardian",
+  "version": "0.0.1",
+  "description": "Prevent API contract violations before they reach production. A CI-friendly CLI tool to validate API calls against an OpenAPI/GraphQL schema.",
+  "bin": {
+    "api-guardian": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "scripts": {
+    "start": "node -r ts-node/register src/index.ts",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "api",
+    "contract",
+    "guardian",
+    "validator",
+    "openapi",
+    "swagger",
+    "graphql",
+    "ci",
+    "cli"
+  ],
+  "author": "Ugur Can Ceribasi <ugurcanceribasi@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "glob": "^11.0.3",
+    "ts-morph": "^27.0.2"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
+}
