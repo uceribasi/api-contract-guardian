@@ -1,5 +1,3 @@
-import {normalizeString} from "./utils";
-
 export const getSwaggerPaths = async (openApiURL: string) => {
     const response = await fetch(openApiURL);
     const data = await response.json();
@@ -11,7 +9,7 @@ export const getSwaggerPaths = async (openApiURL: string) => {
         const methods = Object.keys(paths[key]);
         return {
             method: methods,
-            url: `${basePath}${normalizeString(key)}`
+            url: `${basePath}${key}`
         }
     });
 

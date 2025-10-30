@@ -48,9 +48,8 @@ program
             for (const req of requests) {
                 let isValid = false;
                 const requestMethod = req.method;
-                const requestUrl = req.url.endsWith('/') ? req.url.slice(0, -1) : req.url;
                 for (const compiledPath of compiledPaths) {
-                    if (compiledPath.urlRegex.test(requestUrl)) {
+                    if (compiledPath.urlRegex.test(req.url)) {
                         if (compiledPath.methods.includes(requestMethod)) {
                             isValid = true;
                             log(chalk.green(`  [✓] VALID: ${requestMethod.toUpperCase()} ${req.url}`));                            break;

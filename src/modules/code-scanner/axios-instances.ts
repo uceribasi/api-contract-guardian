@@ -1,12 +1,12 @@
 import { SourceFile, SyntaxKind } from "ts-morph";
+import {resolveStringFromNode} from "../../shared/resolve-url";
 
-export type AxiosBaseMap = Map<string, string>; // api -> "https://.../v1"
+export type AxiosBaseMap = Map<string, string>;
 
 export function collectAxiosBaseURLs(sourceFiles: SourceFile[]): AxiosBaseMap {
     const map: AxiosBaseMap = new Map();
 
     for (const sf of sourceFiles) {
-        // const api = axios.create({ baseURL: "https://..." })
         const vars = sf.getVariableDeclarations();
         for (const v of vars) {
             const init = v.getInitializer();
@@ -15,7 +15,6 @@ export function collectAxiosBaseURLs(sourceFiles: SourceFile[]): AxiosBaseMap {
             const call = init;
             const expr = call.getExpression();
 
-            // axios.create(...)
             if (
                 expr.isKind(SyntaxKind.PropertyAccessExpression) &&
                 expr.getExpression().getText() === "axios" &&
@@ -28,7 +27,7 @@ export function collectAxiosBaseURLs(sourceFiles: SourceFile[]): AxiosBaseMap {
                         .find((p) => p.isKind(SyntaxKind.PropertyAssignment) && p.getName() === "baseURL");
 
                     const baseInit = (baseProp as any)?.getInitializer?.();
-                    const base = baseInit?.getText?.().replace(/^['"`]|['"`]$/g, "");
+                    const base = resolveStringFromNode(baseInit);
                     if (base) {
                         map.set(v.getName(), base);
                     }

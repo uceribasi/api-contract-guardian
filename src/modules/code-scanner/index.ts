@@ -122,8 +122,8 @@ const findRequestsWithAxios = (
 
     const base = isAxiosInstance ? baseMap.get(calleeName) : undefined;
     const absoluteLike = buildAbsoluteLike(base, rawUrl);
-    const normalizedPath = normalizePath(rawUrl);
-    let path = rawUrl;
+    const normalizedPath = normalizePath(absoluteLike);
+    let path = "";
     if (normalizedPath.includes(basePath)) {
         path = normalizedPath;
     } else {
