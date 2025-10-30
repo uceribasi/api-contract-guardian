@@ -1,17 +1,17 @@
+#!/usr/bin/env node
 import { Command } from 'commander';
-const program = new Command();
 import { scanCode } from './modules/code-scanner'
 import {getSwaggerPaths} from "./modules/openapi";
 import chalk from "chalk";
 import {error, log, setLogLevel} from "./shared/logger";
 
+
+const program = new Command();
+
 function convertOpenApiPathToRegex(path: string): RegExp {
     const regexString = path.replace(/{[^/]+}/g, '([^/]+)');
     return new RegExp(`^${regexString}$`);
 }
-
-export const initialTestProjectFolder = '{project-folder/src,src,app}/**/*.{js,jsx,ts,tsx}';
-export const initialSwaggerPath = 'https://rest.coincap.io/api-docs.json';
 
 program
     .name('api-guardian')
@@ -22,18 +22,17 @@ program
 program
     .command('run')
     .description("Scan repo and validate against OpenAPI")
-    .option("--openapi <url>", "OpenAPI URL", initialSwaggerPath)
-    .option("--glob <pattern>", "glob pattern for source files", initialTestProjectFolder)
+    .requiredOption("--openapi <url>", "OpenAPI URL")
+    .requiredOption("--glob <pattern>", "glob pattern for source files")
     .action(async (cmdOpts, command) => {
         const { verbose, quiet } = program.opts<{ verbose?: boolean; quiet?: boolean }>();
         setLogLevel(!!verbose, !!quiet);
-
         try {
             log(chalk.blue('Reading Swagger (OpenAPI) contract...'));
-            const swaggerPaths = await getSwaggerPaths(initialSwaggerPath);
+            const swaggerPaths = await getSwaggerPaths(cmdOpts.openapi);
 
             log(chalk.blue('Scanning code...'));
-            const requests = await scanCode(swaggerPaths.basePath);
+            const requests = await scanCode(swaggerPaths.basePath, cmdOpts.glob);
 
 
             const compiledPaths = swaggerPaths.paths.map(path => ({

@@ -1,6 +1,7 @@
 {
   "name": "api-contract-guardian",
   "version": "0.0.1",
+  "author": "Ugur Can Ceribasi <ugurcanceribasi@gmail.com>",
   "description": "Prevent API contract violations before they reach production. A CI-friendly CLI tool to validate API calls against an OpenAPI/GraphQL schema.",
   "bin": {
     "api-guardian": "./dist/index.js"
@@ -22,15 +23,17 @@
     "ci",
     "cli"
   ],
-  "author": "Ugur Can Ceribasi <ugurcanceribasi@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^5.6.2",
+    "chalk": "^4.1.2",
     "commander": "^14.0.2",
     "glob": "^11.0.3",
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5",
+    "@types/node": "^20.14.9",
+    "@types/glob": "^8.1.0"
   }
 }

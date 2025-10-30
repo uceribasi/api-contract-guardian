@@ -10,7 +10,6 @@ import { parseNodeValue, parseUrlArgument } from "./utils";
 import { normalizeMethod, normalizePath } from "../../shared/normalize";
 import { collectAxiosBaseURLs, AxiosBaseMap } from "./axios-instances";
 import {log} from "../../shared/logger";
-import {initialTestProjectFolder} from "../../";
 
 interface Request {
     args?: any;
@@ -139,9 +138,9 @@ const findRequestsWithAxios = (
     return { method: methodLower, url: path, tool: "axios", ...(args ? { args } : {}) };
 };
 
-export const scanCode = async (basePath: string): Promise<Request[]> => {
+export const scanCode = async (basePath: string, globPath: string): Promise<Request[]> => {
     const project = new Project({ compilerOptions: { allowJs: true } });
-    const files = await glob(initialTestProjectFolder, { dot: true });
+    const files = await glob(globPath, { dot: true });
     project.addSourceFilesAtPaths(files);
 
     const sources = project.getSourceFiles();
