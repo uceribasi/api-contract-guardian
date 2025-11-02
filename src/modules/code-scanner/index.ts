@@ -11,11 +11,11 @@ import { normalizeMethod, normalizePath } from "../../shared/normalize";
 import { collectAxiosBaseURLs, AxiosBaseMap } from "./axios-instances";
 import {log} from "../../shared/logger";
 
-interface Request {
+export interface Request {
     args?: any;
     url: string;
     method: string;
-    tool: string;
+    tool?: string;
 }
 
 const logRequest = (requestType: string, url: string, tool: string) => {
@@ -39,7 +39,7 @@ function buildAbsoluteLike(base: string | undefined, pathOrUrl: string): string 
     return base + pathOrUrl;
 }
 
-const findRequestsWithFetch = (callExpression: CallExpression, basePath: string): Request | null => {
+const findRequestsWithFetch = (callExpression: CallExpression): Request | null => {
     const expression = callExpression.getExpression();
 
     if (expression.isKind(SyntaxKind.Identifier)) {
@@ -67,23 +67,12 @@ const findRequestsWithFetch = (callExpression: CallExpression, basePath: string)
     );
 
     const normalizedPath = normalizePath(rawUrl);
-    let path = rawUrl;
-    if (normalizedPath.includes(basePath)) {
-        path = normalizedPath;
-    } else {
-        if (normalizedPath.startsWith('/') && basePath.endsWith('/')) {
-            path = `${basePath.slice(0, basePath.length - 1)}${normalizedPath}`;
-        } else {
-            path = `${basePath}${normalizedPath}`;
-        }
-    }
 
-
-    logRequest(method, path, expression.getKindName() === "PropertyAccessExpression" ? "fetch(qualified)" : "fetch");
+    logRequest(method, normalizedPath, expression.getKindName() === "PropertyAccessExpression" ? "fetch(qualified)" : "fetch");
 
     return {
         method,
-        url: path,
+        url: normalizedPath,
         tool: "fetch",
         ...(optionsObject ? { args: optionsObject } : {}),
     };
@@ -96,7 +85,6 @@ const HTTP_METHODS = new Set([
 const findRequestsWithAxios = (
     callExpression: CallExpression,
     baseMap: AxiosBaseMap,
-    basePath: string,
 ): Request | null => {
     const expression = callExpression.getExpression();
     if (!expression.isKind(SyntaxKind.PropertyAccessExpression)) return null;
@@ -121,24 +109,21 @@ const findRequestsWithAxios = (
 
     const base = isAxiosInstance ? baseMap.get(calleeName) : undefined;
     const absoluteLike = buildAbsoluteLike(base, rawUrl);
+
     const normalizedPath = normalizePath(absoluteLike);
-    let path = "";
-    if (normalizedPath.includes(basePath)) {
-        path = normalizedPath;
-    } else {
-        if (normalizedPath.startsWith('/') && basePath.endsWith('/')) {
-            path = `${basePath.slice(0, basePath.length - 1)}${normalizedPath}`;
-        } else {
-            path = `${basePath}${normalizedPath}`;
-        }
-    }
     const args = parseNodeValue(optsArg);
 
-    logRequest(methodLower, path, isAxiosInstance ? `axios(${calleeName})` : "axios");
-    return { method: methodLower, url: path, tool: "axios", ...(args ? { args } : {}) };
+    logRequest(methodLower, normalizedPath, isAxiosInstance ? `axios(${calleeName})` : "axios");
+
+    return {
+        method: methodLower,
+        url: normalizedPath,
+        tool: "axios",
+        ...(args ? { args } : {})
+    };
 };
 
-export const scanCode = async (basePath: string, globPath: string): Promise<Request[]> => {
+export const scanCode = async (globPath: string): Promise<Request[]> => {
     const project = new Project({ compilerOptions: { allowJs: true } });
     const files = await glob(globPath, {
         dot: true,
@@ -160,9 +145,9 @@ export const scanCode = async (basePath: string, globPath: string): Promise<Requ
     for (const sf of sources) {
         const calls = sf.getDescendantsOfKind(SyntaxKind.CallExpression);
         for (const call of calls) {
-            const a = findRequestsWithAxios(call, baseMap, basePath);
+            const a = findRequestsWithAxios(call, baseMap);
             if (a) found.push(a);
-            const f = findRequestsWithFetch(call, basePath);
+            const f = findRequestsWithFetch(call);
             if (f) found.push(f);
         }
     }

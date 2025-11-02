@@ -4,9 +4,12 @@ import { scanCode } from './modules/code-scanner'
 import {getSwaggerPaths} from "./modules/openapi";
 import chalk from "chalk";
 import {error, log, setLogLevel} from "./shared/logger";
+import {getPostmanPaths} from "./modules/postman";
+import { Request } from "./shared/interfaces";
 
 
 const program = new Command();
+
 
 function convertOpenApiPathToRegex(path: string): RegExp {
     const regexString = path.replace(/{[^/]+}/g, '([^/]+)');
@@ -22,20 +25,46 @@ program
 program
     .command('run')
     .description("Scan repo and validate against OpenAPI")
-    .requiredOption("--openapi <url>", "OpenAPI URL")
+    .option("--openapi <url>", "OpenAPI URL")
+    .option("--postman <path_or_url>", "Postman Collection JSON path or URL")
     .requiredOption("--glob <pattern>", "glob pattern for source files")
     .action(async (cmdOpts, command) => {
         const { verbose, quiet } = program.opts<{ verbose?: boolean; quiet?: boolean }>();
         setLogLevel(!!verbose, !!quiet);
+        const { openapi, postman, glob } = cmdOpts;
+
+        if (!openapi && !postman) {
+            error(chalk.red.bold('Error: A contract source must be specified.'));
+            error(chalk.yellow('Please use either --openapi <url> OR --postman <path_or_url>.'));
+            process.exit(1);
+        }
+
+        if (openapi && postman) {
+            error(chalk.red.bold('Error: You cannot specify multiple contract sources at the same time.'));
+            error(chalk.yellow('Please use ONLY --openapi OR ONLY --postman.'));
+            process.exit(1);
+        }
+
         try {
-            log(chalk.blue('Reading Swagger (OpenAPI) contract...'));
-            const swaggerPaths = await getSwaggerPaths(cmdOpts.openapi);
+            let contractPaths: Request[] = [];
 
-            log(chalk.blue('Scanning code...'));
-            const requests = await scanCode(swaggerPaths.basePath, cmdOpts.glob);
+            if (openapi) {
+                log(chalk.blue('Reading Swagger (OpenAPI) contract...'));
+                contractPaths = await getSwaggerPaths(openapi);
+            }
 
+            if (postman) {
+                log(chalk.blue('Reading Postman Collection...'));
+                contractPaths = await getPostmanPaths(postman);
+            }
 
-            const compiledPaths = swaggerPaths.paths.map(path => ({
+            if (!contractPaths.length) {
+                error(chalk.red.bold('Error: Contract paths not working.'));
+            }
+
+            const requests = await scanCode(glob);
+
+            const compiledPaths = contractPaths.map(path => ({
                 urlRegex: convertOpenApiPathToRegex(path.url),
                 methods: path.method,
             }));

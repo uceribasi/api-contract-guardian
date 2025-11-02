@@ -12,7 +12,7 @@ function resolveTemplateExpression(te: TemplateExpression): string {
     for (const span of te.getTemplateSpans()) {
         out += "{var}";
         const lit = span.getLiteral().getText();
-        out += lit.slice(0, lit.length - 1);
+        out += lit.slice(1, lit.length - 1);
     }
     return out;
 }
