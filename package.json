@@ -1,6 +1,6 @@
 {
   "name": "api-contract-guardian",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Ugur Can Ceribasi <ugurcanceribasi@gmail.com>",
   "description": "Prevent API contract violations before they reach production. A CI-friendly CLI tool to validate API calls against an OpenAPI/GraphQL schema.",
   "bin": {
